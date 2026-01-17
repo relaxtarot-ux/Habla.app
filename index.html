@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Habla App</title>
+    <style>
+        :root {
+            --bg: #1a1c2c; --card: #25283d;
+            --hambre: #ffccb3; --salud: #ffb3ba; --accion: #baffc9;
+            --baño: #bae1ff; --emocion: #ffffba; --personas: #f5f5dc;
+            --ocio: #e0b0ff; --lugares: #d2b48c;
+        }
+        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; padding: 10px; user-select: none; display: flex; flex-direction: column; min-height: 100vh; }
+        header { padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex-grow: 1; }
+        .btn { 
+            background: var(--card); border: 2px solid transparent; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            aspect-ratio: 1 / 1; transition: 0.1s; padding: 5px;
+        }
+        .btn:active { transform: scale(0.92); filter: brightness(1.3); }
+        .btn img { width: 55%; height: 55%; object-fit: contain; border-radius: 8px; }
+        .btn span { font-size: 0.65rem; margin-top: 4px; font-weight: bold; text-transform: uppercase; text-align: center; }
+        
+        /* Botón de Apoyo */
+        footer { padding: 30px 10px; text-align: center; }
+        .btn-apoyo {
+            background: rgba(186, 255, 201, 0.1);
+            border: 1px solid var(--accion);
+            color: var(--accion);
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-block;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2 style="color: var(--accion); margin: 0;">Habla</h2>
+        <span id="reloj" style="font-size: 0.9rem; opacity: 0.7;"></span>
+    </header>
+
+    <div class="grid" id="tablero"></div>
+
+    <footer>
+        <a href="https://www.paypal.com/donate/?business=TU_CORREO_AQUÍ&item_name=Apoyo+al+proyecto+Habla" class="btn-apoyo" target="_blank">
+            ✨ Apoyar Proyecto Habla
+        </a>
+    </footer>
+
+    <script>
+        const lista = [
+            { n: "Ayuda", c: "var(--salud)", v: "Necesito ayuda" },
+            { n: "Me duele", c: "var(--salud)", v: "Me duele algo" },
+            { n: "Medicina", c: "var(--salud)", v: "Necesito mi medicina" },
+            { n: "Cansado", c: "var(--salud)", v: "Estoy cansado" },
+            { n: "Parar", c: "var(--salud)", v: "Por favor para" },
+            { n: "Frío", c: "var(--salud)", v: "Tengo frío" },
+            { n: "Agua", c: "var(--baño)", v: "Quiero beber agua" },
+            { n: "Comer", c: "var(--hambre)", v: "Tengo hambre" },
+            { n: "Baño", c: "var(--baño)", v: "Quiero ir al baño" },
+            { n: "Manzana", c: "var(--hambre)", v: "Quiero una manzana" },
+            { n: "Galleta", c: "var(--hambre)", v: "Quiero una galleta" },
+            { n: "Ducha", c: "var(--baño)", v: "Me toca ducha" },
+            { n: "Quiero", c: "var(--accion)", v: "Yo quiero" },
+            { n: "Ver", c: "var(--accion)", v: "Quiero ver esto" },
+            { n: "Jugar", c: "var(--accion)", v: "Vamos a jugar" },
+            { n: "Ir", c: "var(--accion)", v: "Quiero ir fuera" },
+            { n: "Escuchar", c: "var(--accion)", v: "Quiero escuchar música" },
+            { n: "Listo", c: "var(--accion)", v: "Ya he terminado" },
+            { n: "Mamá", c: "var(--personas)", v: "Mamá" },
+            { n: "Papá", c: "var(--personas)", v: "Papá" },
+            { n: "Hola", c: "var(--personas)", v: "Hola buenos días" },
+            { n: "Gracias", c: "var(--personas)", v: "Muchas gracias" },
+            { n: "Sí", c: "var(--accion)", v: "Sí" },
+            { n: "No", c: "var(--salud)", v: "No quiero" },
+            { n: "Feliz", c: "var(--emocion)", v: "Estoy muy feliz" },
+            { n: "Triste", c: "var(--emocion)", v: "Estoy un poco triste" },
+            { n: "Enfadado", c: "var(--emocion)", v: "Estoy enfadado" },
+            { n: "Asustado", c: "var(--emocion)", v: "Tengo miedo" },
+            { n: "Ruido", c: "var(--emocion)", v: "Hay demasiado ruido" },
+            { n: "Calma", c: "var(--emocion)", v: "Necesito calma" },
+            { n: "Tablet", c: "var(--ocio)", v: "Quiero la tablet" },
+            { n: "Cuento", c: "var(--ocio)", v: "Léeme un cuento" },
+            { n: "Parque", c: "var(--lugares)", v: "Vamos al parque" },
+            { n: "Coche", c: "var(--lugares)", v: "Vamos al coche" },
+            { n: "Cole", c: "var(--lugares)", v: "Vamos al colegio" },
+            { n: "Casa", c: "var(--lugares)", v: "Quiero ir a casa" }
+        ];
+
+        const t = document.getElementById('tablero');
+        lista.forEach(b => {
+            const d = document.createElement('div');
+            d.className = 'btn'; d.style.borderColor = b.c;
+            d.innerHTML = `<img src="img/${b.n.toLowerCase()}.png" onerror="this.src='https://via.placeholder.com/100/25283d/ffffff?text=${b.n}'"><span style="color:${b.c}">${b.n}</span>`;
+            d.onclick = () => {
+                const s = new SpeechSynthesisUtterance(b.v);
+                s.lang = 'es-ES'; s.rate = 0.85; window.speechSynthesis.speak(s);
+            };
+            t.appendChild(d);
+        });
+
+        setInterval(() => { document.getElementById('reloj').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000);
+    </script>
+</body>
+</html>
